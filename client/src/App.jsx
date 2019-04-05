@@ -1,10 +1,30 @@
 import React, { Component } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import RegisterView from './Views/RegisterView';
+import LoginView from './Views/LoginView';
+import JokesView from './Views/JokesView';
 
 class App extends Component {
   render() {
     return (
       <>
-      Hello
+        <Switch>
+          <Route
+            exact
+            path="/"
+            component={LoginView}
+          />
+          <Route
+            exact
+            path="/register"
+            component={RegisterView}
+          />
+          <Route
+            exact
+            path="/jokes"
+            component={JokesView}
+          />
+        </Switch>
       </>
     );
   }
