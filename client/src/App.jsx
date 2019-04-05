@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import RegisterView from './Views/RegisterView';
 import LoginView from './Views/LoginView';
 import JokesView from './Views/JokesView';
@@ -22,7 +22,14 @@ class App extends Component {
           <Route
             exact
             path="/jokes"
-            component={JokesView}
+            render={(props) => {
+              if (!!localStorage.getItem('token')) {
+                return(
+                  <JokesView {...props}/>
+                );
+              }
+              return <Redirect to="/" />;
+            }}
           />
         </Switch>
       </>
