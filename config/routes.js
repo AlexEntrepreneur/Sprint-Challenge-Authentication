@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const { authenticate } = require('../auth/authenticate');
 const db = require('../database/dbConfig');
+const makeTokenFromUser = require('../helper-functions/makeToken');
 
 module.exports = server => {
   server.post('/api/register', register);
@@ -39,7 +40,44 @@ function register(req, res) {
 }
 
 function login(req, res) {
-  // implement user login
+  const { username, password } = req.body;
+  const requestBodyComplete = !!(username && password);
+
+  if (requestBodyComplete) {
+    db('users').where({ username })
+      .then(userObj => {
+        if (userObj.length) {
+          return userObj[0];
+        }
+        else {
+          res.status(404).json({
+            message: 'Invalid credentials. Try again.'
+          });
+        }
+      })
+      .then(userObj => {
+        const passwordIsCorrect = bcrypt.compareSync(password, userObj.password);
+        if (passwordIsCorrect) {
+          const token = makeTokenFromUser(userObj);
+          res.json({ token });
+        }
+        else {
+          res.status(404).json({
+            message: 'Invalid credentials. Try again.'
+          });
+        }
+      })
+      .catch(err => {
+        res.status(500).json({
+          message: `failed to get users ${err}`
+        });
+      });
+  }
+  else {
+    res.status(400).json({
+      message: "Please provide a username, password & department"
+    })
+  }
 }
 
 function getJokes(req, res) {
