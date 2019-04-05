@@ -1,6 +1,8 @@
 const axios = require('axios');
+const bcrypt = require('bcryptjs');
 
 const { authenticate } = require('../auth/authenticate');
+const db = require('../database/dbConfig');
 
 module.exports = server => {
   server.post('/api/register', register);
@@ -9,7 +11,31 @@ module.exports = server => {
 };
 
 function register(req, res) {
-  // implement user registration
+  let { username, password } = req.body;
+  const requestBodyComplete = !!(username && password);
+  const hash = bcrypt.hashSync(password, 10);
+
+  password = hash;
+
+  if (requestBodyComplete) {
+    db('users').insert({ username, password })
+      .then(success => {
+        res.status(201).json({
+          message: `Registered as ${req.body.username}`
+        })
+      })
+      .catch(err => {
+        res.status(500).json({
+          message: `Failed to create user ${req.body.username}. Try again.`,
+          error: `${err}`
+        });
+      });
+  }
+  else {
+    res.status(400).json({
+      message: "Please provide a username, password & department"
+    })
+  }
 }
 
 function login(req, res) {
